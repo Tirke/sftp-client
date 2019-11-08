@@ -1,0 +1,43 @@
+{
+  "name": "sftp-client",
+  "version": "0.0.0",
+  "main": "dist/client.js",
+  "types": "dist/client.d.ts",
+  "homepage": "https://github.com/Tirke/sftp-client",
+  "repository": "https://github.com/Tirke/sftp-client.git",
+  "bugs": {
+    "url": "https://github.com/Tirke/sftp-client/issues"
+  },
+  "author": "Thomas Schersach <tschersach@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "deps": "yarn --no-progress --frozen-lockfile",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "@types/ssh2": "^0.5.39",
+    "ssh2": "^0.8.6"
+  },
+  "devDependencies": {
+    "@types/node": "^12.12.6",
+    "eslint": "^6.6.0",
+    "husky": "^3.0.9",
+    "jest": "^24.9.0",
+    "lint-staged": "^9.4.2",
+    "prettier": "^1.18.2",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.7.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "./src/**/*.{ts}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
+}
