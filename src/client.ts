@@ -1,8 +1,19 @@
 import { EventEmitter } from 'events'
-import { posix } from 'path'
+import { posix, normalize } from 'path'
 import { promisify } from 'util'
 import { Client, ConnectConfig, SFTPWrapper } from 'ssh2'
-import { ReadStreamOptions } from 'ssh2-streams'
+import { ReadStreamOptions, WriteStreamOptions } from 'ssh2-streams'
+import { constants, createWriteStream, createReadStream, promises as fsPromises } from 'fs'
+import {
+  pipeline as classicPipeline,
+  finished as classicFinished,
+  Readable,
+  Writable
+} from 'stream'
+
+const { realpath, access } = fsPromises
+const pipeline = promisify(classicPipeline)
+const finished = promisify(classicFinished)
 
 type DirectoryType = 'd'
 type FileType = '-'
@@ -62,6 +73,10 @@ export class SFTPClient {
     }
 
     return path
+  }
+
+  get isConnected() {
+    return this.sftp !== undefined
   }
 
   async connect(config: ConnectConfig & { user?: string }) {
@@ -215,6 +230,24 @@ export class SFTPClient {
     return mkdir(dirPath)
   }
 
+  async rmdir(path: string, recursive = false) {
+    if (!this.sftp) {
+      throw new Error('No SFTP connection available')
+    }
+
+    const rmdir = promisify(this.sftp.rmdir.bind(this.sftp))
+    const dirPath = await this.getDirPath(path)
+
+    if (!recursive) {
+      return rmdir(dirPath)
+    }
+
+    const all = await this.list(dirPath)
+    await Promise.all(all.filter(({ type }) => type !== FileTypes.Directory).map(({ path }) => this.delete(path)))
+    await Promise.all(all.filter(({ type }) => type === FileTypes.Directory).map(({ path }) => this.rmdir(path)))
+    return rmdir(dirPath)
+  }
+
   async rename(fromPath: string, toPath: string) {
     if (!this.sftp) {
       throw new Error('No SFTP connection available')
@@ -236,7 +269,7 @@ export class SFTPClient {
     return unlink(realPath)
   }
 
-  async createReadStream(path: string, opts: ReadStreamOptions) {
+  async createReadStream(path: string, opts: ReadStreamOptions = {}) {
     if (!this.sftp) {
       throw new Error('No SFTP connection available')
     }
@@ -253,6 +286,81 @@ export class SFTPClient {
     return files
   }
 
+  async stat(path: string) {
+    if (!this.sftp) {
+      throw new Error('No SFTP connection available')
+    }
+
+    const realPath = await this.realPath(path)
+    const stat = promisify(this.sftp.stat.bind(this.sftp))
+    const stats = await stat(realPath)
+    return {
+      mode: stats.mode,
+      uid: stats.uid,
+      gid: stats.gid,
+      size: stats.size,
+      accessTime: stats.atime * 1000,
+      modifyTime: stats.mtime * 1000,
+      isDirectory: stats.isDirectory(),
+      isFile: stats.isFile(),
+      isBlockDevice: stats.isBlockDevice(),
+      isCharacterDevice: stats.isCharacterDevice(),
+      isSymbolicLink: stats.isSymbolicLink(),
+      isFIFO: stats.isFIFO(),
+      isSocket: stats.isSocket()
+    }
+  }
+
+  async get(path: string, destination?: string | Writable, opts?: ReadStreamOptions) {
+    if (!this.sftp) {
+      throw new Error('No SFTP connection available')
+    }
+
+    const realPath = await this.realPath(path)
+    const stats = await this.stat(realPath)
+
+    if ((stats.mode & 0o444) === 0) {
+      throw new Error(`No read permission for ${realPath}`)
+    }
+
+    const destinationPath = typeof destination === 'string' ? normalize(destination) : destination
+    const readStream = await this.createReadStream(realPath, opts)
+
+    if (!destinationPath) {
+      const chunks = []
+
+      for await (const chunk of readStream) {
+        chunks.push(chunk)
+      }
+
+      return Buffer.concat(chunks)
+    } else {
+      const writeStream = typeof destinationPath === 'string' ? createWriteStream(destinationPath) : destinationPath
+      return pipeline(readStream, writeStream)
+    }
+  }
+
+  async put(src: string | Buffer | Readable, remotePath: string, opts?: WriteStreamOptions) {
+    if (!this.sftp) {
+      throw new Error('No SFTP connection available')
+    }
+
+    if (typeof src === 'string') {
+      src = await realpath(src)
+      await access(src, constants.R_OK)
+    }
+    const destination = await this.getDirPath(remotePath)
+    console.log(destination)
+    const writeStream = await this.sftp.createWriteStream(destination, opts)
+
+    if (src instanceof Buffer) {
+      writeStream.end(src)
+      return finished(writeStream)
+    }
+
+    const readStream = typeof src === 'string' ? createReadStream(src) : src
+    return pipeline(readStream, writeStream)
+  }
 }
 
 function removeListeners(emitter: EventEmitter) {

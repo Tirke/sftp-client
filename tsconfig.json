@@ -19,8 +19,8 @@
     "pretty": true,
     "noErrorTruncation": true,
     "moduleResolution": "node",
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "rootDir": "src",
+    "outDir": "dist",
     "baseUrl": "."
   },
   "include": [
