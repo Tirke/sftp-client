@@ -23,3 +23,9 @@ jobs:
         yarn test
       env:
         CI: true
+
+    services:
+       sftp:
+        image: atmoz/sftp
+        ports:
+          - 2222:22
