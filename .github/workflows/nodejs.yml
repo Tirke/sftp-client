@@ -20,7 +20,9 @@ jobs:
 
     - name: debug
       run: |
-        dig sftp      
+        dig sftp
+        cat /etc/resolv.conf
+        cat /etc/sysconfig/docker      
     - name: yarn install, build, and test
       run: |
         yarn
