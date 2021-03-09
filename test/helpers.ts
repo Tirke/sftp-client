@@ -9,7 +9,8 @@ const userPasswordConfig = {
 
 export const getConnectedClient = async () => {
   const client = new SFTPClient()
-  console.dir(`connecting with ${userPasswordConfig}`, {depth: 0})
+  console.log('Connecting with config')
+  console.dir(userPasswordConfig, { depth: 0 })
   await client.connect(userPasswordConfig)
   return client
 }
