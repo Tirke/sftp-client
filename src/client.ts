@@ -112,7 +112,7 @@ export class SFTPClient {
               this.remotePlatform = 'windows'
             }
           })
-          resolve()
+          resolve(this.client)
         })
       })
       .on('error', (e) => {
@@ -349,8 +349,7 @@ export class SFTPClient {
       src = await realpath(src)
       await access(src, constants.R_OK)
     }
-    const destination = await this.getDirPath(remotePath)
-    console.log(destination)
+    const destination = await this.getDirPath(remotePath)    
     const writeStream = await this.sftp.createWriteStream(destination, opts)
 
     if (src instanceof Buffer) {

@@ -4,7 +4,6 @@ import { promises } from 'fs'
 
 const { stat } = promises
 
-
 describe('put', () => {
   let client: SFTPClient
 
@@ -20,7 +19,9 @@ describe('put', () => {
 
   it('should throw when sftp is not connected', async () => {
     const notConnectedClient = new SFTPClient()
-    await expect(notConnectedClient.put('path', '/')).rejects.toThrow('No SFTP connection available')
+    await expect(notConnectedClient.put('path', '/')).rejects.toThrow(
+      'No SFTP connection available'
+    )
   })
 
   it('put a file', async () => {
@@ -34,10 +35,4 @@ describe('put', () => {
     expect(list).toHaveLength(1)
     expect(localStat.size).toEqual(remoteStat.size)
   })
-
-  it('should put a large file', async () => {
-    console.log(await client.list('/upload'))
-  })
-
-
 })
