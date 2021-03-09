@@ -18,14 +18,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
+    - name: Run sftp image
+      run: |
+          /usr/bin/docker create  -p 2222:22  -e "SFTP_USERS=sftp:sftp:::upload" -e GITHUB_ACTIONS=true -e CI=true -v "/$(pwd)/test/__fixtures__/samples":"/home/sftp/samples" atmoz/sftp
+          sleep 10
 
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      env:
-        CI: true
-        SFTP_HOST: localhost
-        SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
-    
     - name: yarn install, build, and test
       run: |
         yarn
@@ -34,13 +31,4 @@ jobs:
         CI: true
         SFTP_HOST: 127.0.0.1
         SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
-
-    services:
-       localsftp:
-        image: atmoz/sftp
-        ports:
-          - 2222:22
-        volumes:
-          - /$(pwd)/test/__fixtures__/samples:/home/sftp/samples
-        env:
-          SFTP_USERS: sftp:sftp:::upload      
+        
