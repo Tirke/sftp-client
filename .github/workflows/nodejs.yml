@@ -23,9 +23,11 @@ jobs:
         yarn test
       env:
         CI: true
+        SFTP_HOST: sftp
+        SFTP_PORT: 22
 
     services:
        sftp:
         image: atmoz/sftp
-        ports:
-          - 2222:22
+        env:
+          SFTP_USERS: sftp:sftp:::upload

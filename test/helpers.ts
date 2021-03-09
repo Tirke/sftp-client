@@ -3,8 +3,8 @@ import { SFTPClient } from '../src/client'
 const userPasswordConfig = {
   username: 'sftp',
   password: 'sftp',
-  host: 'localhost',
-  port: 2222
+  host: process.env.SFTP_HOST,
+  port: Number.parseInt(process.env.SFTP_PORT, 10)
 }
 
 export const getConnectedClient = async () => {
