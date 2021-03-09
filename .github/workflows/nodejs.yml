@@ -24,7 +24,7 @@ jobs:
         yarn test
       env:
         CI: true
-        SFTP_HOST: localhost
+        SFTP_HOST: 127.0.0.1
         SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
 
     services:
