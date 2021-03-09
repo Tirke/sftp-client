@@ -17,13 +17,20 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
+    - name: debug
+      run: |
+        curl sftp:22
+        dig sftp
+        curl sftp
+        curl localhost:22
     - name: yarn install, build, and test
       run: |
         yarn
         yarn test
       env:
         CI: true
-        SFTP_HOST: sftp
+        SFTP_HOST: sftp.localhost
         SFTP_PORT: 22
 
     services:
