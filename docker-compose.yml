@@ -1,7 +1,7 @@
 sftp:
   image: atmoz/sftp
   volumes:
-    - ./test/__fixtures__/samples:/home/sftp/samples:ro
+    - ./test/__fixtures__/samples:/home/sftp/samples
   ports:
     - "2222:22"
   command: sftp:sftp:::upload
