@@ -17,14 +17,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-
-    
-    - name: Setup tmate session
-      uses: mxschmitt/action-tmate@v3
-      env:
-        CI: true
-        SFTP_HOST: localsftp
-        SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
     
     - name: yarn install, build, and test
       run: |
@@ -32,8 +24,9 @@ jobs:
         yarn test
       env:
         CI: true
-        SFTP_HOST: localsftp
+        SFTP_HOST: localhost
         SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
+
     services:
        localsftp:
         image: atmoz/sftp
