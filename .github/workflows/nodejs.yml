@@ -33,6 +33,6 @@ jobs:
         ports:
           - 2222:22
         volumes:
-          - ./test/__fixtures__/samples:/home/sftp/samples
+          - $(pwd)/test/__fixtures__/samples:/home/sftp/samples
         env:
           SFTP_USERS: sftp:sftp:::upload      
