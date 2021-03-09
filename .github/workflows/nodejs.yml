@@ -21,22 +21,18 @@ jobs:
     
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
-
-    - name: debug
-      run: |
-        dig sftp
-        dig sftp.localhost
+    
     - name: yarn install, build, and test
       run: |
         yarn
         yarn test
       env:
         CI: true
-        SFTP_HOST: sftp.localhost
+        SFTP_HOST: localsftp
         SFTP_PORT: 22
 
     services:
-       sftp:
+       localsftp:
         image: atmoz/sftp
         env:
           SFTP_USERS: sftp:sftp:::upload      
