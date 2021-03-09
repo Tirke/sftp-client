@@ -34,5 +34,5 @@ jobs:
     services:
        localsftp:
         image: atmoz/sftp
-        env:
-          SFTP_USERS: sftp:sftp:::upload      
+        options:
+          sftp:sftp:::upload
