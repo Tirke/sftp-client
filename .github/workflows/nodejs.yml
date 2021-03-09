@@ -21,6 +21,10 @@ jobs:
     
     - name: Setup tmate session
       uses: mxschmitt/action-tmate@v3
+      env:
+        CI: true
+        SFTP_HOST: localsftp
+        SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
     
     - name: yarn install, build, and test
       run: |
@@ -29,10 +33,11 @@ jobs:
       env:
         CI: true
         SFTP_HOST: localsftp
-        SFTP_PORT: 22
-
+        SFTP_PORT: ${{ job.services.localsftp.ports[2222] }}
     services:
        localsftp:
         image: atmoz/sftp
-        options:
-          sftp:sftp:::upload
+        ports:
+          - 2222:22
+        env:
+          SFTP_USERS: sftp:sftp:::upload      
