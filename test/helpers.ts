@@ -4,7 +4,7 @@ const userPasswordConfig = {
   username: 'sftp',
   password: 'sftp',
   host: process.env.SFTP_HOST,
-  port: Number.parseInt(process.env.SFTP_PORT ?? '2222', 10)
+  port: 2222
 }
 
 export const getConnectedClient = async () => {
