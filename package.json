@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@types/ssh2": "^0.5.47",
-    "ssh2": "^1.2.0"
+    "ssh2": "^1.4.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.1",
